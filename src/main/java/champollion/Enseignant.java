@@ -1,8 +1,14 @@
 package champollion;
 
+import static champollion.TypeIntervention.CM;
+import static champollion.TypeIntervention.TD;
+import static champollion.TypeIntervention.TP;
+import java.util.ArrayList;
+
 public class Enseignant extends Personne {
 
-    // TODO : rajouter les autres méthodes présentes dans le diagramme UML
+    ArrayList<ServicePrevu> mesCours = new ArrayList<>();
+    ArrayList<Intervention> CoursPlannifie = new ArrayList<>();
 
     public Enseignant(String nom, String email) {
         super(nom, email);
@@ -17,9 +23,13 @@ public class Enseignant extends Personne {
      *
      */
     public int heuresPrevues() {
-        // TODO: Implémenter cette méthode
-        throw new UnsupportedOperationException("Pas encore implémenté");
+        int res = 0;
+        for (ServicePrevu sp : mesCours){
+            res += sp.getCM()*1.5 + sp.getTD() + sp.getTP()*0.75;
+        }
+        return Math.round(res);
     }
+    
 
     /**
      * Calcule le nombre total d'heures prévues pour cet enseignant dans l'UE spécifiée en "heures équivalent TD" Pour
@@ -31,8 +41,13 @@ public class Enseignant extends Personne {
      *
      */
     public int heuresPrevuesPourUE(UE ue) {
-        // TODO: Implémenter cette méthode
-        throw new UnsupportedOperationException("Pas encore implémenté");
+        int res = 0;
+        for (ServicePrevu sp : mesCours){
+            if (sp.getUE() == ue){
+                res += sp.getCM()*1.5 + sp.getTD() + sp.getTP()*0.75;
+            }
+        }
+        return Math.round(res);
     }
 
     /**
@@ -44,8 +59,35 @@ public class Enseignant extends Personne {
      * @param volumeTP le volume d'heures de TP
      */
     public void ajouteEnseignement(UE ue, int volumeCM, int volumeTD, int volumeTP) {
-        // TODO: Implémenter cette méthode
-        throw new UnsupportedOperationException("Pas encore implémenté");
+        this.mesCours.add(new ServicePrevu(volumeCM, volumeTD, volumeTP, this, ue));
     }
-
+    
+    public void ajouteIntervention(Intervention i){
+        if (!CoursPlannifie.contains(i)){
+            this.CoursPlannifie.add(i);
+        }
+    }
+    
+    public int heuresPlanifiees(){
+        int res = 0;
+        for (Intervention it : CoursPlannifie){
+            switch (it.getType()){
+                case CM:
+                    res += it.getDuree()*1.5;
+                    break;
+                case TD:
+                    res += it.getDuree();
+                    break;
+                case TP:
+                    res += it.getDuree()*0.75;
+                    break;
+            }
+        }
+        return Math.round(res);
+    }
+    
+    public boolean enSousService(){
+        return (this.heuresPrevues() < this.heuresPlanifiees() && 
+                this.heuresPlanifiees() >= 192);
+    }
 }
